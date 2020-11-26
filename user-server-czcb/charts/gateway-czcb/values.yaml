@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: odyssey/gateway
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+env:
+  TZ: "Asia/Shanghai"
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 27090
+
+resources: 
+   limits:
+     cpu: 400m
+     memory: 2Gi
+
+busybox:
+   image: busybox
+   tag: latest
+   imagePullPolicy: IfNotPresent
+

@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: odyssey/eureka
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 29080
+
+env:
+  TZ: "Asia/Shanghai"
+
+resources: 
+   limits:
+     cpu: 500m
+     memory: 2Gi
+

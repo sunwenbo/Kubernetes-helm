@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: user-server-configmap
+data:
+{{ (.Files.Glob "user-server-conf/*").AsConfig | indent 2 }}

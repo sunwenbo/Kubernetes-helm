@@ -1,0 +1,22 @@
+replicaCount: 1
+
+image:
+  repository: odyssey/user-server-czcb
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart version.
+  tag: "latest"
+
+service:
+  type: NodePort
+  port: 28080
+  nodePort: 28080
+
+resources: 
+   limits:
+     cpu: 500m
+     memory: 2Gi
+
+busybox:
+   image: busybox
+   tag: latest
+   imagePullPolicy: IfNotPresent
