@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "arangodb-service"
+  labels:
+    app: arangodb
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8529
+      protocol: TCP
+      name: arangodb
+  selector:
+    app: arangodb

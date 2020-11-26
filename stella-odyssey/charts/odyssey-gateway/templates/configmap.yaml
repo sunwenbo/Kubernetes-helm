@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: gateway-configmap
+data:
+{{ (.Files.Glob "gateway-conf/application.properties").AsConfig | indent 2 }}

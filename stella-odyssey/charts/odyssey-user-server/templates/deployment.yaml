@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "user-server"
+  labels:
+    {{- include "user-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "user-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "user-server.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 200
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 200
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: user-server-configmap
+            mountPath: /config/
+          - name: web-server-configmap
+            mountPath: /IamgateWebService.xml
+            subPath: IamgateWebService.xml
+      initContainers:
+        - name: init-eureka
+          image: "{{ .Values.busybox.image}}:{{ .Values.busybox.tag }}"
+          imagePullPolicy: "{{ .Values.busybox.imagePullPolicy }}"
+          command: ['sh', '-c', 'until nslookup eureka-service; do echo waiting for eureka ; sleep 1; done;']
+          securityContext:
+            privileged: true
+      initContainers:
+        - name: init-gateway
+          image: "{{ .Values.busybox.image}}:{{ .Values.busybox.tag }}"
+          imagePullPolicy: "{{ .Values.busybox.imagePullPolicy }}"
+          command: ['sh', '-c', 'until nslookup gateway-service; do echo waiting for gateway; sleep 1; done;']
+          securityContext:
+            privileged: true
+      volumes:
+      - name: user-server-configmap
+        configMap:
+          name: user-server-configmap
+      - name: web-server-configmap
+        configMap:
+          name: web-server-configmap

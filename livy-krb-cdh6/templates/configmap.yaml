@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: livy-kerberos-configmap
+data:
+{{ (.Files.Glob "livy-conf/krb5.conf").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: livy-keytab
+type: Opaque
+data:
+{{ (.Files.Glob "livy-conf/*.keytab").AsSecrets| indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: livy-krb-configmap
+data:
+{{ (.Files.Glob "livy-conf/livy.conf").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: hadoop3-livy-krb-configmap
+data:
+{{ (.Files.Glob "livy-conf/hadoop/etc/hadoop/*").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: spark-livy-krb-configmap
+data:
+{{ (.Files.Glob "livy-conf/spark-2.4.6-bin-hadoop2.7/conf/*").AsConfig | indent 2 }}
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: livy-client-configmap
+data:
+{{ (.Files.Glob "livy-conf/livy-client.conf").AsConfig | indent 2 }}

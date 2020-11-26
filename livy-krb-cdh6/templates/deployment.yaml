@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "livy-krb-cdh6"
+  labels:
+    {{- include "livy-krb-cdh6.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "livy-krb-cdh6.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "livy-krb-cdh6.selectorLabels" . | nindent 8 }}
+    spec:
+      hostNetwork: true
+    {{- if .Values.hostAliases }}
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $key, $value := .Values.env }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 9113
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 40
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 40
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: hadoop3-livy-krb-configmap
+            mountPath: /opt/hadoop-3.0.0/etc/hadoop
+          - name: spark-livy-krb-configmap
+            mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf
+          - name: livy-keytab
+            mountPath: {{ .Values.keytabPath }}
+            subPath: {{ .Values.keytabFile }}
+          - name: livy-kerberos-configmap
+            mountPath: /etc/krb5.conf
+            subPath: krb5.conf
+          - name: livy-krb-configmap
+            mountPath: /opt/apache-livy-0.7.0-incubating-bin/conf/livy.conf
+            subPath: livy.conf
+          - name: livy-client-configmap
+            mountPath: /opt/apache-livy-0.7.0-incubating-bin/conf/livy-client.conf
+            subPath: livy-client.conf
+      nodeSelector:
+        apache: livy-cdh6-krb
+      volumes:
+      - name: hadoop3-livy-krb-configmap
+        configMap:
+          name: hadoop3-livy-krb-configmap
+      - name: spark-livy-krb-configmap
+        configMap:
+          name: spark-livy-krb-configmap
+      - name: livy-keytab
+        secret:
+          secretName: livy-keytab
+      - name: livy-kerberos-configmap
+        configMap:
+          name: livy-kerberos-configmap
+      - name: livy-krb-configmap
+        configMap:
+          name: livy-krb-configmap
+      - name: livy-client-configmap
+        configMap:
+          name: livy-client-configmap

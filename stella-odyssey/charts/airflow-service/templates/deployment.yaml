@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-service
+  labels:
+    {{- include "airflow-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "airflow-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "airflow-service.selectorLabels" . | nindent 8 }}
+    spec:
+      hostname: airflow-service
+    {{- if .Values.hostAliases }}
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 8 }}
+    {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        {{- range $key, $value := .Values.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        ports:
+          - name: http
+            containerPort: 8080
+            protocol: TCP
+          - name: tcp
+            containerPort: 5005
+            protocol: TCP
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 5
+        volumeMounts:
+        - name: service-configmap
+          mountPath: /config/
+        - name: krb5-configmap
+          mountPath: /etc/krb5.conf
+          subPath: krb5.conf
+        - name: airflow-service-hadoop-configmap
+          mountPath: /opt/hadoop/etc/hadoop/
+        - name: airflow-service-hadoop-yarn-configmap
+          mountPath: /opt/hadoop-yarn/etc/hadoop/
+        - name: airflow-service-spark-configmap
+          mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf/
+        - name: airflow-service-keytab
+          mountPath: {{ .Values.keytabPath }}
+          subPath: {{ .Values.keytabFile }}
+      volumes:
+      - name: service-configmap
+        configMap:
+          name: airflow-service-configmap
+      - name: krb5-configmap
+        configMap:
+          name: airflow-service-krb5-configmap
+      - name: airflow-service-hadoop-configmap
+        configMap:
+          name: airflow-service-hadoop-configmap
+      - name: airflow-service-hadoop-yarn-configmap
+        configMap:
+          name: airflow-service-hadoop-yarn-configmap
+      - name: airflow-service-spark-configmap
+        configMap:
+          name: airflow-service-spark-configmap
+      - name: airflow-service-keytab
+        secret:
+          secretName: airflow-service-keytab

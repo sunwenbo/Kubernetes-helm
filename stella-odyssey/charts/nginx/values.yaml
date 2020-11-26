@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: image.senses-ai.com/nginx
+  pullPolicy: Always
+  tag: "senses"
+
+service:
+  type: NodePort
+  stellaport: 80
+  stellanodePort: 8888
+
+  vqiport: 81
+  vqinodePort: 9999
+
+env:
+  TZ: "Asia/Shanghai"
+
+resources: 
+   limits:
+     cpu: 1000m
+     memory: 2Gi
+   requests:
+     cpu: 100m
+     memory: 100Mi

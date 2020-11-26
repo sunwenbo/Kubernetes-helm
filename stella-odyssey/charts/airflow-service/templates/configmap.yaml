@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: airflow-service-configmap
+data:
+{{ (.Files.Glob "service-conf/application.properties").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: airflow-service-krb5-configmap
+data:
+{{ (.Files.Glob "service-conf/krb5.conf").AsConfig | indent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: airflow-service-hadoop-configmap
+data:
+{{ (.Files.Glob "service-conf/hadoop/etc/hadoop/*").AsConfig | indent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: airflow-service-hadoop-yarn-configmap
+data:
+{{ (.Files.Glob "service-conf/hadoop-yarn/etc/hadoop/*").AsConfig | indent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: airflow-service-spark-configmap
+data:
+{{ (.Files.Glob "service-conf/spark-2.4.6-bin-hadoop2.7/conf/*").AsConfig | indent 2 }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: airflow-service-keytab
+type: Opaque
+data:
+{{ (.Files.Glob "service-conf/*.keytab").AsSecrets| indent 2 }}

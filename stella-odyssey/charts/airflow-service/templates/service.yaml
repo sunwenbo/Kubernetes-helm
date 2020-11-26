@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-service
+  labels:
+    {{- include "airflow-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: af-svc-port
+      protocol: TCP
+      port: 8080
+      #nodePort: {{ .Values.service.serviceport }}
+    - name: af-debug-port
+      protocol: TCP
+      port: 5005
+      #nodePort: {{ .Values.service.debugport }}
+  selector:
+    {{- include "airflow-service.selectorLabels" . | nindent 4 }}

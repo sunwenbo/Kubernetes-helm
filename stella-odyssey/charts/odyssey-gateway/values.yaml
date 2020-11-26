@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: image.senses-ai.com/odyssey/gateway
+  pullPolicy: Always
+  tag: "latest"
+
+env:
+  TZ: "Asia/Shanghai"
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 48101
+
+resources: 
+   limits:
+     cpu: 500m
+     memory: 2Gi
+   requests:
+     cpu: 100m
+     memory: 100Mi
+
+busybox:
+   image: busybox
+   tag: latest
+   imagePullPolicy: IfNotPresent

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: activemq
+  labels:
+    {{- include "activemq.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports: 
+    - name: {{ .Values.service.name }}
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: {{ .Values.service.protocol }}
+    - port: 61613
+      targetPort: 61613
+      protocol: TCP
+      name: stomp
+    - port: 8161
+      targetPort: 8161
+      protocol: TCP
+      name: admin
+  selector:
+    {{- include "activemq.selectorLabels" . | nindent 4 }}
+

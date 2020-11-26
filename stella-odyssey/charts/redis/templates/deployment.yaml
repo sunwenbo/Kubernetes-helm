@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    {{- include "airflow-redis.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "airflow-redis.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "airflow-redis.selectorLabels" . | nindent 8 }}
+    spec:
+      hostname: redis
+    {{- if .Values.hostAliases }}
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $key, $value := .Values.env }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+          command: ["sh","-c","exec redis-server /etc/redis.conf"]
+          ports:
+            - containerPort: 6379
+              name: redis
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: redis-configmap
+            mountPath: /etc/redis.conf
+            subPath: redis.conf
+          - name:  airflow-redis-pvc
+            mountPath: /data
+      restartPolicy: Always
+      volumes:
+      - name: redis-configmap
+        configMap:
+          name: airflow-redis-configmap
+      - name: airflow-redis-pvc
+        persistentVolumeClaim:
+          claimName: airflow-redis-pvc

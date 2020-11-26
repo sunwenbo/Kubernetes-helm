@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: visual-query-service
+  labels:
+    {{- include "visual-query-service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - targetPort: 8080
+      protocol: TCP
+      name: vq-web
+      port: {{ .Values.service.webport }}
+    - targetPort: 5005
+      protocol: TCP
+      name: vq-debug
+      port: {{ .Values.service.debugport }}
+  selector:
+    {{- include "visual-query-service.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "visual-query-service"
+  labels:
+    {{- include "visual-query-service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "visual-query-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "visual-query-service.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      hostname: visual-query-service
+    {{- if .Values.hostAliases }}
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 8 }}
+    {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN"]
+        env:
+        {{- range $key, $value := .Values.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        ports:
+          - containerPort: 8080
+            name: vq-web
+          - containerPort: 5005
+            name: vq-debug
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 5
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+        - name: visual-query-configmap
+          mountPath: /config/application.properties
+          subPath: application.properties
+        - name: krb5-configmap
+          mountPath: /etc/krb5.conf
+          subPath: krb5.conf
+        - name: visual-hadoop-configmap
+          mountPath: /opt/hadoop/etc/hadoop/
+        - name: visual-hadoop-yarn-configmap
+          mountPath: /opt/hadoop-yarn/etc/hadoop/
+        - name: visual-spark-configmap
+          mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf/
+        - name: vqi-keytab
+          mountPath: {{ .Values.keytabPath }}
+          subPath: {{ .Values.keytabFile }}
+      restartPolicy: Always
+      volumes:
+      - name: visual-query-configmap
+        configMap:
+          name: visual-query-configmap
+      - name: krb5-configmap
+        configMap:
+          name: vqi-krb5-configmap
+      - name: visual-hadoop-configmap
+        configMap:
+          name: visual-hadoop-configmap
+      - name: visual-hadoop-yarn-configmap
+        configMap:
+          name: visual-hadoop-yarn-configmap
+      - name: visual-spark-configmap
+        configMap:
+          name: visual-spark-configmap
+      - name: vqi-keytab
+        secret:
+          secretName: vqi-keytab

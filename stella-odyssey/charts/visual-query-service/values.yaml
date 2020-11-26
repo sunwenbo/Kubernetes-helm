@@ -1,0 +1,46 @@
+replicaCount: 1
+
+image:
+  repository: image.senses-ai.com/odyssey/visual-query-service
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets: []
+
+hostAliases:
+  - ip: "192.168.10.181"
+    hostnames:
+    - "cdh6-krb5.senses-ai.com"
+    - "cdh6kdc"
+  - ip: "192.168.10.218"
+    hostnames:
+    - "haproxy-kubernetes-apiserver"
+
+env:
+  HADOOP_CONF_DIR: "/opt/hadoop/etc/hadoop"
+  HADOOP_HOME: "/opt/hadoop"
+  KERBEROS_ENABLED: "true"
+  KERBEROS_KEYTAB: "/opt/tw.keytab"
+  KERBEROS_PRINCIPAL: "tw@CDH6.COM"
+  TZ: "Asia/Shanghai"
+
+resources: 
+   limits:
+     cpu: 2000m
+     memory: 6Gi
+   requests:
+     cpu: 100m
+     memory: 100Mi
+
+busybox:
+   image: busybox
+   tag: latest
+   imagePullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  webport: 8080
+  debugport: 5005
+
+keytabPath: "/opt/tw.keytab"
+keytabFile: "tw.keytab"

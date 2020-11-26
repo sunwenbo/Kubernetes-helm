@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "airflow-web"
+  labels:
+    {{- include "airflow-web.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "airflow-web.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "airflow-web.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      hostname: airflow-web
+    {{- if .Values.hostAliases }}
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 8 }}
+    {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        {{- range $key, $value := .Values.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        command: ["/bin/sh","-c","/entrypoint.sh webserver;"]
+        ports:
+          - containerPort: 8080
+            name: airflow-web
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 65
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 65
+          periodSeconds: 10
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+        - name: krb5-configmap
+          mountPath: /etc/krb5.conf
+          subPath: krb5.conf
+        - name: airflow-web-hadoop-configmap
+          mountPath: /opt/hadoop/etc/hadoop/
+        - name: airflow-web-hadoop-yarn-configmap
+          mountPath: /opt/hadoop-yarn/etc/hadoop/
+        - name: airflow-web-spark-configmap
+          mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf/
+        - name: const-configmap
+          mountPath: /opt/airflow/plugins/senses/const.py
+          subPath: const.py
+        - name: airflow-web-hive-configmap
+          mountPath: /opt/apache-hive-2.3.6-bin/conf/
+        - name: cfg-configmap
+          mountPath: /opt/airflow/airflow.cfg
+          subPath: airflow.cfg
+        - name: airflow-web-keytab
+          mountPath: {{ .Values.keytabPath }}
+          subPath: {{ .Values.keytabFile }}
+      initContainers:
+        - name: init-airflow-service
+          image: "{{ .Values.busybox.image}}:{{ .Values.busybox.tag }}"
+          imagePullPolicy: "{{ .Values.busybox.imagePullPolicy }}"
+          command: ['sh', '-c', 'until nslookup airflow-service; do echo waiting for airflow-service; sleep 1; done;']
+          securityContext:
+            privileged: true
+      volumes:
+      - name: krb5-configmap
+        configMap:
+          name: airflow-web-krb5-configmap
+      - name: airflow-web-hadoop-configmap
+        configMap:
+          name: airflow-web-hadoop-configmap
+      - name: airflow-web-hadoop-yarn-configmap
+        configMap:
+          name: airflow-web-hadoop-yarn-configmap
+      - name: airflow-web-spark-configmap
+        configMap:
+          name: airflow-web-spark-configmap
+      - name: const-configmap
+        configMap:
+          name: airflow-web-const-configmap
+      - name: cfg-configmap
+        configMap:
+          name: airflow-web-cfg-configmap
+      - name: airflow-web-hive-configmap
+        configMap:
+          name: airflow-web-hive-configmap
+      - name: airflow-web-keytab
+        secret:
+          secretName: airflow-web-keytab
