@@ -15,16 +15,16 @@ spec:
         {{- include "odyssey-datasource.selectorLabels" . | nindent 8 }}
     spec:
       hostname: datasource-service
-    {{- if .Values.hostAliases }}
+    {{- if .Values.global.hostAliases }}
       hostAliases:
-{{ toYaml .Values.hostAliases | indent 8 }}
+{{ toYaml .Values.global.hostAliases | indent 8 }}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          {{- range $key, $value := .Values.env }}
+          {{- range $key, $value := .Values.global.env }}
           - name: {{ $key }}
             value: {{ $value | quote }}
           {{- end }}
@@ -50,19 +50,19 @@ spec:
           - name: krb5-configmap
             mountPath: /etc/krb5.conf
             subPath: krb5.conf
-          - name: datasource-hadoop-configmap
+          - name: hadoop-configmap
             mountPath: /opt/hadoop/etc/hadoop/
-          - name: datasource-hadoop-yarn-configmap
+          - name: hadoop-yarn-configmap
             mountPath: /opt/hadoop-yarn/etc/hadoop/
-          - name: datasource-spark-configmap
+          - name: spark-configmap
             mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf/
-          - name: datasource-keytab
-            mountPath: {{ .Values.keytabPath }}
-            subPath: {{ .Values.keytabFile }}
+          - name: keytab-secret
+            mountPath: {{ .Values.global.keytabPath }}
+            subPath: {{ .Values.global.keytabFile }}
       initContainers:
         - name: init-eureka
-          image: "{{ .Values.busybox.image}}:{{ .Values.busybox.tag }}"
-          imagePullPolicy: "{{ .Values.busybox.imagePullPolicy }}"
+          image: "{{ .Values.global.busybox.image}}:{{ .Values.global.busybox.tag }}"
+          imagePullPolicy: "{{ .Values.global.busybox.imagePullPolicy }}"
           command: ['sh', '-c', 'until nslookup eureka-service; do echo waiting for eureka ; sleep 1; done;']
           securityContext:
             privileged: true
@@ -72,16 +72,16 @@ spec:
           name: datasource-configmap
       - name: krb5-configmap
         configMap:
-          name: datasource-krb5-configmap
-      - name: datasource-hadoop-configmap
+          name: krb5-configmap
+      - name: hadoop-configmap
         configMap:
-          name: datasource-hadoop-configmap
-      - name: datasource-hadoop-yarn-configmap
+          name: hadoop-configmap
+      - name: hadoop-yarn-configmap
         configMap:
-          name: datasource-hadoop-yarn-configmap
-      - name: datasource-spark-configmap
+          name: hadoop-yarn-configmap
+      - name: spark-configmap
         configMap:
-          name: datasource-spark-configmap
-      - name: datasource-keytab
+          name: spark-configmap
+      - name: keytab-secret
         secret:
-          secretName: datasource-keytab
+          secretName: keytab-secret

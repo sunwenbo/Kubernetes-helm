@@ -44,8 +44,8 @@ spec:
             mountPath: /config
       initContainers:
         - name: init-eureka
-          image: "{{ .Values.busybox.image}}:{{ .Values.busybox.tag }}"
-          imagePullPolicy: "{{ .Values.busybox.imagePullPolicy }}"
+          image: "{{ .Values.global.busybox.image}}:{{ .Values.global.busybox.tag }}"
+          imagePullPolicy: "{{ .Values.global.busybox.imagePullPolicy }}"
           command: ['sh', '-c', 'until nslookup eureka-service; do echo waiting for eureka ; sleep 1; done;']
           securityContext:
             privileged: true

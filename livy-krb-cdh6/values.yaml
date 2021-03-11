@@ -3,15 +3,17 @@ replicaCount: 1
 image:
   repository: image.senses-ai.com/odyssey/livy-cdh6-krb
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "release-202103021947"
 
 service:
   type: ClusterIP
   port: 9113
 
 env:
-  KERBEROS_KEYTAB: "/opt/tw.keytab" 
+  KERBEROS_KEYTAB: "/opt/all.keytab" 
   KERBEROS_PRINCIPAL: "tw"
+  TZ: "Asia/Shanghai"
+
 hostAliases:
   - ip: "192.168.10.181"
     hostnames:
@@ -21,9 +23,6 @@ hostAliases:
     hostnames:
     - "haproxy-kubernetes-apiserver"
 
-env:
-  TZ: "Asia/Shanghai"
-
 resources: 
    limits:
      cpu: 2000m
@@ -32,6 +31,5 @@ resources:
      cpu: 100m
      memory: 100Mi
 
-keytabPath: "/opt/tw.keytab"
-keytabFile: "tw.keytab"
-
+keytabPath: "/opt/all.keytab"
+keytabFile: "all.keytab"

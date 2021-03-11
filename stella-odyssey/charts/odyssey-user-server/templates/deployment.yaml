@@ -22,6 +22,7 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          #command:  ['sh', '-c', 'sleep 500000;']
           livenessProbe:
             tcpSocket:
               port: 8080
@@ -40,17 +41,19 @@ spec:
           - name: web-server-configmap
             mountPath: /IamgateWebService.xml
             subPath: IamgateWebService.xml
+          - name: organizationinfo
+            mountPath: /opt/organizationInfo
       initContainers:
         - name: init-eureka
-          image: "{{ .Values.busybox.image}}:{{ .Values.busybox.tag }}"
-          imagePullPolicy: "{{ .Values.busybox.imagePullPolicy }}"
+          image: "{{ .Values.global.busybox.image}}:{{ .Values.global.busybox.tag }}"
+          imagePullPolicy: "{{ .Values.global.busybox.imagePullPolicy }}"
           command: ['sh', '-c', 'until nslookup eureka-service; do echo waiting for eureka ; sleep 1; done;']
           securityContext:
             privileged: true
       initContainers:
         - name: init-gateway
-          image: "{{ .Values.busybox.image}}:{{ .Values.busybox.tag }}"
-          imagePullPolicy: "{{ .Values.busybox.imagePullPolicy }}"
+          image: "{{ .Values.global.busybox.image}}:{{ .Values.global.busybox.tag }}"
+          imagePullPolicy: "{{ .Values.global.busybox.imagePullPolicy }}"
           command: ['sh', '-c', 'until nslookup gateway-service; do echo waiting for gateway; sleep 1; done;']
           securityContext:
             privileged: true
@@ -61,3 +64,7 @@ spec:
       - name: web-server-configmap
         configMap:
           name: web-server-configmap
+      - name: organizationinfo
+        hostPath:
+          path: /opt/data/organizationInfo
+          type: DirectoryOrCreate

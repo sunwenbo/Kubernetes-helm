@@ -11,6 +11,6 @@ spec:
       targetPort: 8080
       protocol: TCP
       name: http
-      nodePort: {{ .Values.service.nodePort }}
+      #nodePort: {{ .Values.service.nodePort }}
   selector:
     {{- include "airflow-gateway.selectorLabels" . | nindent 4 }}

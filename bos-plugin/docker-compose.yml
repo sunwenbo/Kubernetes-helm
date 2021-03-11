@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   bos-plugin:
-    image: image.senses-ai.com/odyssey/bos-plugin:latest
+    image: image.senses-ai.com/odyssey/bos-plugin:release-202103021947
     ports:
       - 18080:8080
     stop_signal: SIGINT
@@ -9,3 +9,4 @@ services:
       - ./src/main/resources/application.properties:/app/config/application.properties
       - ./src/main/java/com/ws/SDK/:/tmp/SDK/
     mac_address: 20:04:0f:fa:83:48
+    restart: always

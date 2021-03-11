@@ -13,34 +13,33 @@
 #      storage: 6Gi
 #  storageClassName: rook-ceph-block
 ##############################redis############################
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  namespace: default
-  name: "airflow-redis-pvc"
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-  storageClassName: rook-ceph-block
-##############################activemq############################
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: "helm-stella-activemq-pvc"
-  labels:
-    app: activemq
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-  storageClassName: rook-ceph-block
+#---
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: "airflow-redis-pvc"
+#spec:
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 5Gi
+#  storageClassName: rook-ceph-block
+###############################activemq############################
+#---
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: "helm-stella-activemq-pvc"
+#  labels:
+#    app: activemq
+#spec:
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 5Gi
+#  storageClassName: rook-ceph-block
 ##############################mysql############################
 ---
 apiVersion: v1

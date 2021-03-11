@@ -1,45 +1,283 @@
-replicaCount: 1
+global:
+  replicaCount: 1
 
-image:
-  repository: image.senses-ai.com/odyssey/airflow-template
-  pullPolicy: Always
-  tag: "latest"
+  imagePullSecrets: []
+  
+  hostAliases:
+    - ip: "192.168.10.181"
+      hostnames:
+      - "cdh6-krb5.senses-ai.com"
+      - "cdh6kdc"
+    - ip: "192.168.10.218"
+      hostnames:
+      - "haproxy-kubernetes-apiserver"
+  image:
+      repository: image.senses-ai.com/odyssey/airflow-template
+      pullPolicy: Always
+      tag: "release-202103101804"
+  
+  busybox:
+    image: busybox
+    tag: latest
+    imagePullPolicy: IfNotPresent
 
-imagePullSecrets: []
+  keytabPath: "/opt/all.keytab"
+  keytabFile: "all.keytab"
 
-hostAliases:
-  - ip: "192.168.10.181"
-    hostnames:
-    - "cdh6-krb5.senses-ai.com"
-    - "cdh6kdc"
-  - ip: "192.168.10.218"
-    hostnames:
-    - "haproxy-kubernetes-apiserver"
-
-env:
-  HADOOP_CONF_DIR: "/opt/hadoop/etc/hadoop"
-  HADOOP_HOME: "/opt/hadoop"
-  KERBEROS_ENABLED: "true"
-  KERBEROS_KEYTAB: "/opt/tw.keytab"
-  KERBEROS_PRINCIPAL: "tw@CDH6.COM"
-  TZ: "Asia/Shanghai"
-
-resources: 
-   limits:
-     cpu: 1000m
-     memory: 4Gi
-   requests:
-     cpu: 500m
-     memory: 2Gi
-
-busybox:
-   image: busybox
-   tag: latest
-   imagePullPolicy: IfNotPresent
+  env:
+    C_FORCE_ROOT: "true"
+    HADOOP_CONF_DIR: "/opt/hadoop/etc/hadoop"
+    HADOOP_HOME: "/opt/hadoop"
+    KERBEROS_ENABLED: "true"
+    KERBEROS_KEYTAB: "/opt/all.keytab"
+    KERBEROS_PRINCIPAL: "tw@CDH6.COM"
+    TZ: "Asia/Shanghai"
+  
+  resources:
+     limits:
+       cpu: 1000m
+       memory: 4Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
 
 service:
   type: NodePort
   nodeport: 8085
 
-keytabPath: "/opt/tw.keytab"
-keytabFile: "tw.keytab"
+
+airflow-worker:
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    webport: 8080
+    logport: 8793
+
+  resources:
+     limits:
+       cpu: 1000m
+       memory: 4Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+airflow-flower:
+  service:
+    type: ClusterIP
+    port: 5555
+
+airflow-service:
+  image:
+    repository: image.senses-ai.com/odyssey/airflow-service
+    pullPolicy: Always
+    tag: "release-202103101804"
+  
+  replicaCount: 1
+
+  resources:
+     limits:
+       cpu: 2000m
+       memory: 6Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+  service:
+    type: ClusterIP
+
+odyssey-datasource:
+  image:
+    repository: image.senses-ai.com/odyssey/datasource-service
+    pullPolicy: Always
+    tag: "release-202103101804"
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  resources:
+     limits:
+       cpu: 1000m
+       memory: 4Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+odyssey-eureka:
+  image:
+    repository: image.senses-ai.com/odyssey/eureka
+    pullPolicy: Always
+    tag: "release-202103101804"
+
+  service:
+    type: ClusterIP
+    port: 8080
+  env:
+    TZ: "Asia/Shanghai"
+
+  resources:
+     limits:
+       cpu: 500m
+       memory: 2Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+odyssey-gateway:
+  image:
+    repository: image.senses-ai.com/odyssey/gateway
+    pullPolicy: Always
+    tag: "release-202103101804"
+  env:
+    TZ: "Asia/Shanghai"
+  
+  service:
+    type: ClusterIP
+    port: 8080
+    #nodePort: 48101
+  
+  resources:
+     limits:
+       cpu: 500m
+       memory: 2Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+odyssey-user-server:
+  image:
+    repository: image.senses-ai.com/odyssey/user-server
+    pullPolicy: Always
+    tag: "release-202103101804"
+  
+  service:
+    type: ClusterIP
+    port: 8080
+  
+  resources:
+     limits:
+       cpu: 1000m
+       memory: 4Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+visual-query-service:
+  image:
+    repository: image.senses-ai.com/odyssey/visual-query-service
+    pullPolicy: Always
+    tag: "release-202103101804"
+  
+  resources:
+     limits:
+       cpu: 2000m
+       memory: 6Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+  
+  service:
+    type: ClusterIP
+    webport: 8080
+    debugport: 5005
+
+redis:
+  image:
+    repository: image.senses-ai.com/odyssey/redis
+    pullPolicy: Always
+    tag: "latest"
+  
+  service:
+    type: ClusterIP
+    port: 6379
+  
+  env:
+    TZ: "Asia/Shanghai"
+  
+  resources:
+     limits:
+       cpu: 1000m
+       memory: 4Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+nginx:
+  image:
+    repository: image.senses-ai.com/nginx
+    pullPolicy: Always
+    tag: "release-202103101804"
+  
+  service:
+    type: NodePort
+    stellaport: 80
+    stellanodePort: 8888
+  
+    vqiport: 81
+    vqinodePort: 9999
+  
+  env:
+    TZ: "Asia/Shanghai"
+  
+  resources:
+     limits:
+       cpu: 1000m
+       memory: 2Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+activemq:
+  image:
+    repository: image.senses-ai.com/activemq-centos
+    pullPolicy: Always
+    tag: "latest"
+  limitcpu: 2000m
+  limitmemory: 2Gi
+  requestscpu: 128m
+  requestsmemory: 100Mi
+  
+  nameOverride: ""
+  fullnameOverride: ""
+  
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+
+  service:
+    type: ClusterIP
+    port: 61616
+    targetPort: 61616
+    protocol: TCP
+    name: http
+  
+  resources:
+     limits:
+       cpu: 1000m
+       memory: 4Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi
+
+arangodb: 
+  image:
+    repository: image.senses-ai.com/odyssey/arangodb
+    pullPolicy: Always
+    tag: "3.7.1"
+  env:
+    ARANGO_ROOT_PASSWORD: "123456"
+    TZ: "Asia/Shanghai"
+
+  service:
+    type: NodePort
+    port: 8529
+    nodePort: 8529
+
+  resources:
+     limits:
+       cpu: 1000m
+       memory: 4Gi
+     requests:
+       cpu: 100m
+       memory: 100Mi

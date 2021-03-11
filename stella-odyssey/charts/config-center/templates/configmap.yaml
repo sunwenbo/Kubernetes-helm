@@ -1,0 +1,162 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: airflow-service-configmap
+data:
+{{ (.Files.Glob "config/airflow-service/application.properties").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: nginx-configmap
+data:
+{{ (.Files.Glob "config/nginx/nginx.conf").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: datasource-configmap
+data:
+{{ (.Files.Glob "config/odyssey-datasource/application.properties").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: gateway-configmap
+data:
+{{ (.Files.Glob "config/odyssey-gateway/application.properties").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: user-server-configmap
+data:
+{{ (.Files.Glob "config/odyssey-user-server/*.properties").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: web-server-configmap
+data:
+{{ (.Files.Glob "config/odyssey-user-server/*.xml").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: redis-configmap
+data:
+{{ (.Files.Glob "config/redis/*").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: visual-query-configmap
+data:
+{{ (.Files.Glob "config/visual-query-service/application.properties").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: krb5-configmap
+data:
+{{ (.Files.Glob "config/krb5.conf").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: hadoop-configmap
+
+data:
+{{ (.Files.Glob "config/hadoop/etc/hadoop/*").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: hadoop-yarn-configmap
+data:
+{{ (.Files.Glob "config/hadoop-yarn/etc/hadoop/*").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: spark-configmap
+data:
+{{ (.Files.Glob "config/spark-2.4.6-bin-hadoop2.7/conf/*").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: hive-configmap
+data:
+{{ (.Files.Glob "config/apache-hive-2.3.6-bin/conf/*").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: keytab-secret
+type: Opaque
+data:
+{{ (.Files.Glob "config/all.keytab").AsSecrets| indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: const-configmap
+data:
+{{ (.Files.Glob "config/const.py").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: airflow-cfg-configmap
+data:
+{{ (.Files.Glob "config/airflow.cfg").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: livy-krb-configmap
+data:
+{{ (.Files.Glob "config/livy/livy.conf").AsConfig | indent 2 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: livy-client-configmap
+data:
+{{ (.Files.Glob "config/livy/livy-client.conf").AsConfig | indent 2 }}

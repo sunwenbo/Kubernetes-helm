@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "airflow-service.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.replicaCount }}
   strategy:
     type: Recreate
   selector:
@@ -13,7 +13,7 @@ spec:
       {{- include "airflow-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-    {{- with .Values.podAnnotations }}
+    {{- with .Values.global.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
@@ -21,18 +21,18 @@ spec:
         {{- include "airflow-service.selectorLabels" . | nindent 8 }}
     spec:
       hostname: airflow-service
-    {{- if .Values.hostAliases }}
+    {{- if .Values.global.hostAliases }}
       hostAliases:
-{{ toYaml .Values.hostAliases | indent 8 }}
+{{ toYaml .Values.global.hostAliases | indent 8 }}
     {{- end }}
       containers:
       - name: {{ .Chart.Name }}
         securityContext:
-          {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- toYaml .Values.global.securityContext | nindent 12 }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.image.pullPolic }}
         env:
-        {{- range $key, $value := .Values.env }}
+        {{- range $key, $value := .Values.global.env }}
         - name: {{ $key }}
           value: {{ $value | quote }}
         {{- end }}
@@ -61,31 +61,31 @@ spec:
         - name: krb5-configmap
           mountPath: /etc/krb5.conf
           subPath: krb5.conf
-        - name: airflow-service-hadoop-configmap
+        - name: hadoop-configmap
           mountPath: /opt/hadoop/etc/hadoop/
-        - name: airflow-service-hadoop-yarn-configmap
+        - name: hadoop-yarn-configmap
           mountPath: /opt/hadoop-yarn/etc/hadoop/
-        - name: airflow-service-spark-configmap
+        - name: spark-configmap
           mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf/
-        - name: airflow-service-keytab
-          mountPath: {{ .Values.keytabPath }}
-          subPath: {{ .Values.keytabFile }}
+        - name: keytab-secret
+          mountPath: {{ .Values.global.keytabPath }}
+          subPath: {{ .Values.global.keytabFile }}
       volumes:
       - name: service-configmap
         configMap:
           name: airflow-service-configmap
       - name: krb5-configmap
         configMap:
-          name: airflow-service-krb5-configmap
-      - name: airflow-service-hadoop-configmap
+          name: krb5-configmap
+      - name: hadoop-configmap
         configMap:
-          name: airflow-service-hadoop-configmap
-      - name: airflow-service-hadoop-yarn-configmap
+          name: hadoop-configmap
+      - name: hadoop-yarn-configmap
         configMap:
-          name: airflow-service-hadoop-yarn-configmap
-      - name: airflow-service-spark-configmap
+          name: hadoop-yarn-configmap
+      - name: spark-configmap
         configMap:
-          name: airflow-service-spark-configmap
-      - name: airflow-service-keytab
+          name: spark-configmap
+      - name: keytab-secret
         secret:
-          secretName: airflow-service-keytab
+          secretName: keytab-secret

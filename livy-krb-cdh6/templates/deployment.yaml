@@ -49,14 +49,14 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - name: hadoop3-livy-krb-configmap
-            mountPath: /opt/hadoop-3.0.0/etc/hadoop
-          - name: spark-livy-krb-configmap
+          - name: hadoop-configmap
+            mountPath: /opt/hadoop/etc/hadoop
+          - name: spark-configmap
             mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf
-          - name: livy-keytab
+          - name: keytab-secret
             mountPath: {{ .Values.keytabPath }}
             subPath: {{ .Values.keytabFile }}
-          - name: livy-kerberos-configmap
+          - name: krb5-configmap
             mountPath: /etc/krb5.conf
             subPath: krb5.conf
           - name: livy-krb-configmap
@@ -68,18 +68,18 @@ spec:
       nodeSelector:
         apache: livy-cdh6-krb
       volumes:
-      - name: hadoop3-livy-krb-configmap
+      - name: hadoop-configmap
         configMap:
-          name: hadoop3-livy-krb-configmap
-      - name: spark-livy-krb-configmap
+          name: hadoop-configmap
+      - name: spark-configmap
         configMap:
-          name: spark-livy-krb-configmap
-      - name: livy-keytab
+          name: spark-configmap
+      - name: keytab-secret
         secret:
-          secretName: livy-keytab
-      - name: livy-kerberos-configmap
+          secretName: keytab-secret
+      - name: krb5-configmap
         configMap:
-          name: livy-kerberos-configmap
+          name: krb5-configmap
       - name: livy-krb-configmap
         configMap:
           name: livy-krb-configmap

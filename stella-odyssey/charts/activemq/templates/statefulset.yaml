@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: activemq
+  labels:
+    {{- include "activemq.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  serviceName: activemq
+  selector:
+    matchLabels:
+      {{- include "activemq.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "activemq.selectorLabels" . | nindent 8 }}
+    spec:
+      hostname: activemq
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+           - name: ACTIVEMQ_ADMIN_LOGIN
+             value: admin
+           - name:  ACTIVEMQ_ADMIN_PASSWORD
+             value: "admin"
+           - name: TZ
+             value: Asia/Shanghai 
+          ports:
+            - name: admin
+              containerPort: 8161
+              protocol: TCP
+            - name: http
+              containerPort: 61616
+              protocol: TCP
+            - name: stomp
+              containerPort: 61613
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8161
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8161
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /opt/apache-activemq-5.15.9/data
+              name: activemq-storage
+      nodeSelector:
+        apache: livy-cdh6-krb
+      volumes:
+      - name: activemq-storage
+        hostPath:
+          path: /opt/data/activemq
+          type: DirectoryOrCreate

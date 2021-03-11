@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arangodb
+  labels:
+    app: arangodb
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: arangodb
+  template:
+    metadata:
+      labels:
+        app: arangodb
+    spec:
+      hostname: arangodb
+      containers:
+        - name: arangodb
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- range $key, $value := .Values.env }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+          ports:
+            - name: arangodb-port
+              containerPort: 8529
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: 8529
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 8529
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: arangodb
+            mountPath: /var/lib/arangodb3
+      nodeSelector:
+        apache: livy-cdh6-krb
+      volumes:
+      - name: arangodb
+        hostPath:
+          path: /opt/data/arangodb
+          type: DirectoryOrCreate

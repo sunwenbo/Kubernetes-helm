@@ -19,9 +19,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       hostname: visual-query-service
-    {{- if .Values.hostAliases }}
+    {{- if .Values.global.hostAliases }}
       hostAliases:
-{{ toYaml .Values.hostAliases | indent 8 }}
+{{ toYaml .Values.global.hostAliases | indent 8 }}
     {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -35,7 +35,7 @@ spec:
           capabilities:
             add: ["NET_ADMIN"]
         env:
-        {{- range $key, $value := .Values.env }}
+        {{- range $key, $value := .Values.global.env }}
         - name: {{ $key }}
           value: {{ $value | quote }}
         {{- end }}
@@ -47,12 +47,12 @@ spec:
         livenessProbe:
           tcpSocket:
             port: 8080
-          initialDelaySeconds: 120
+          initialDelaySeconds: 100
           periodSeconds: 5
         readinessProbe:
           tcpSocket:
             port: 8080
-          initialDelaySeconds: 120
+          initialDelaySeconds: 100
           periodSeconds: 5
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
@@ -63,15 +63,15 @@ spec:
         - name: krb5-configmap
           mountPath: /etc/krb5.conf
           subPath: krb5.conf
-        - name: visual-hadoop-configmap
+        - name: hadoop-configmap
           mountPath: /opt/hadoop/etc/hadoop/
-        - name: visual-hadoop-yarn-configmap
+        - name: hadoop-yarn-configmap
           mountPath: /opt/hadoop-yarn/etc/hadoop/
-        - name: visual-spark-configmap
+        - name: spark-configmap
           mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf/
-        - name: vqi-keytab
-          mountPath: {{ .Values.keytabPath }}
-          subPath: {{ .Values.keytabFile }}
+        - name: keytab-secret
+          mountPath: {{ .Values.global.keytabPath }}
+          subPath: {{ .Values.global.keytabFile }}
       restartPolicy: Always
       volumes:
       - name: visual-query-configmap
@@ -79,16 +79,16 @@ spec:
           name: visual-query-configmap
       - name: krb5-configmap
         configMap:
-          name: vqi-krb5-configmap
-      - name: visual-hadoop-configmap
+          name: krb5-configmap
+      - name: hadoop-configmap
         configMap:
-          name: visual-hadoop-configmap
-      - name: visual-hadoop-yarn-configmap
+          name: hadoop-configmap
+      - name: hadoop-yarn-configmap
         configMap:
-          name: visual-hadoop-yarn-configmap
-      - name: visual-spark-configmap
+          name: hadoop-yarn-configmap
+      - name: spark-configmap
         configMap:
-          name: visual-spark-configmap
-      - name: vqi-keytab
+          name: spark-configmap
+      - name: keytab-secret
         secret:
-          secretName: vqi-keytab
+          secretName: keytab-secret

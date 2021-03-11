@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "airflow-web.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.replicaCount }}
   selector:
     matchLabels:
       {{- include "airflow-web.selectorLabels" . | nindent 6 }}
@@ -14,21 +14,21 @@ spec:
       labels:
         {{- include "airflow-web.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       hostname: airflow-web
-    {{- if .Values.hostAliases }}
+    {{- if .Values.global.hostAliases }}
       hostAliases:
-{{ toYaml .Values.hostAliases | indent 8 }}
+{{ toYaml .Values.global.hostAliases | indent 8 }}
     {{- end }}
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         env:
-        {{- range $key, $value := .Values.env }}
+        {{- range $key, $value := .Values.global.env }}
         - name: {{ $key }}
           value: {{ $value | quote }}
         {{- end }}
@@ -49,57 +49,57 @@ spec:
           initialDelaySeconds: 65
           periodSeconds: 10
         resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+          {{- toYaml .Values.global.resources | nindent 12 }}
         volumeMounts:
         - name: krb5-configmap
           mountPath: /etc/krb5.conf
           subPath: krb5.conf
-        - name: airflow-web-hadoop-configmap
+        - name: hadoop-configmap
           mountPath: /opt/hadoop/etc/hadoop/
-        - name: airflow-web-hadoop-yarn-configmap
+        - name: hadoop-yarn-configmap
           mountPath: /opt/hadoop-yarn/etc/hadoop/
-        - name: airflow-web-spark-configmap
+        - name: spark-configmap
           mountPath: /opt/spark-2.4.6-bin-hadoop2.7/conf/
         - name: const-configmap
           mountPath: /opt/airflow/plugins/senses/const.py
           subPath: const.py
-        - name: airflow-web-hive-configmap
+        - name: hive-configmap
           mountPath: /opt/apache-hive-2.3.6-bin/conf/
-        - name: cfg-configmap
+        - name: airflow-cfg-configmap
           mountPath: /opt/airflow/airflow.cfg
           subPath: airflow.cfg
-        - name: airflow-web-keytab
-          mountPath: {{ .Values.keytabPath }}
-          subPath: {{ .Values.keytabFile }}
+        - name: keytab-secret
+          mountPath: {{ .Values.global.keytabPath }}
+          subPath: {{ .Values.global.keytabFile }}
       initContainers:
         - name: init-airflow-service
-          image: "{{ .Values.busybox.image}}:{{ .Values.busybox.tag }}"
-          imagePullPolicy: "{{ .Values.busybox.imagePullPolicy }}"
+          image: "{{ .Values.global.busybox.image}}:{{ .Values.global.busybox.tag }}"
+          imagePullPolicy: "{{ .Values.global.busybox.imagePullPolicy }}"
           command: ['sh', '-c', 'until nslookup airflow-service; do echo waiting for airflow-service; sleep 1; done;']
           securityContext:
             privileged: true
       volumes:
       - name: krb5-configmap
         configMap:
-          name: airflow-web-krb5-configmap
-      - name: airflow-web-hadoop-configmap
+          name: krb5-configmap
+      - name: hadoop-configmap
         configMap:
-          name: airflow-web-hadoop-configmap
-      - name: airflow-web-hadoop-yarn-configmap
+          name: hadoop-configmap
+      - name: hadoop-yarn-configmap
         configMap:
-          name: airflow-web-hadoop-yarn-configmap
-      - name: airflow-web-spark-configmap
+          name: hadoop-yarn-configmap
+      - name: spark-configmap
         configMap:
-          name: airflow-web-spark-configmap
+          name: spark-configmap
       - name: const-configmap
         configMap:
-          name: airflow-web-const-configmap
-      - name: cfg-configmap
+          name: const-configmap
+      - name: airflow-cfg-configmap
         configMap:
-          name: airflow-web-cfg-configmap
-      - name: airflow-web-hive-configmap
+          name: airflow-cfg-configmap
+      - name: hive-configmap
         configMap:
-          name: airflow-web-hive-configmap
-      - name: airflow-web-keytab
+          name: hive-configmap
+      - name: keytab-secret
         secret:
-          secretName: airflow-web-keytab
+          secretName: keytab-secret
