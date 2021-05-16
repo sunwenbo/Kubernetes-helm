@@ -1,46 +1,46 @@
-###############################arangodb############################
-#---
-#apiVersion: v1
-#kind: PersistentVolumeClaim
-#metadata:
-#  namespace: default
-#  name: "helm-arangodb-pvc"
-#spec:
-#  accessModes:
-#    - ReadWriteOnce
-#  resources:
-#    requests:
-#      storage: 6Gi
-#  storageClassName: rook-ceph-block
-##############################redis############################
-#---
-#apiVersion: v1
-#kind: PersistentVolumeClaim
-#metadata:
-#  name: "airflow-redis-pvc"
-#spec:
-#  accessModes:
-#    - ReadWriteOnce
-#  resources:
-#    requests:
-#      storage: 5Gi
-#  storageClassName: rook-ceph-block
-###############################activemq############################
-#---
-#apiVersion: v1
-#kind: PersistentVolumeClaim
-#metadata:
-#  name: "helm-stella-activemq-pvc"
-#  labels:
-#    app: activemq
-#spec:
-#  accessModes:
-#    - ReadWriteOnce
-#  resources:
-#    requests:
-#      storage: 5Gi
-#  storageClassName: rook-ceph-block
-##############################mysql############################
+##############################arangodb############################
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: default
+  name: "arangodb-pvc"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 6Gi
+  storageClassName: rook-cephfs
+#############################redis############################
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "redis-pvc"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: rook-cephfs
+##############################activemq############################
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "activemq-pvc"
+  labels:
+    app: activemq
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: rook-cephfs
+#############################mysql############################
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -50,24 +50,8 @@ metadata:
     app: mysql
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 5Gi
-  storageClassName: rook-ceph-block
-###########################elasticsearch##############################
-#---
-#apiVersion: v1
-#kind: PersistentVolumeClaim
-#metadata:
-#  name: "helm-stella-elasticsearch-pvc"
-#  labels:
-#    app: elasticsearch
-#spec:
-#  accessModes:
-#    - ReadWriteOnce
-#  resources:
-#    requests:
-#      storage: 2Gi
-#  storageClassName: rook-ceph-block
-#
+  storageClassName: rook-cephfs

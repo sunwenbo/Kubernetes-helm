@@ -1,10 +1,13 @@
 # ⚠️  DEPRECATED - Stella-Stack Helm Chart
 
+继续使用rook-ceph存储方案  redis  activemq  arangodb
+
 ## 创建redis，activemq arangodb organizationInfo loki 数据持久化存储目录
+
+```mkdir -p /opt/data/monitor/loki && mkdir -p /opt/organizationInf && chmod -R 777 /opt/data```
 
 ```mkdir -p /opt/data/monitor/loki && mkdir -p /opt/organizationInfo && mkdir -p  /opt/data/activemq && mkdir -p /opt/data/arangodb  && mkdir -p /opt/data/redis && chmod -R 777 /opt/data && chmod -R 777 /opt/data/organizationInfo```
 
-```chmod -R 777 /opt/data/activemq  && chmod -R 777 /opt/data/monitor ```
 
 ## 给集群第一台机器打标签
 
@@ -24,8 +27,6 @@ kubectl create namespace monitoring
 ```kubectl label nodes k8s-master1-offline-215 monitor=grafana-loki-prometheus```
 
 在打lable标签的节点创建该目录，用于创建loki日志存储
-
-```mkdir -p /opt/data/monitor/loki && mkdir -p /opt/organizationInfo && mkdir -p  /opt/data/activemq && mkdir -p /opt/data/arangodb  && mkdir -p /opt/data/redis && chmod -R 777 /opt/data && chmod -R 777 /opt/organizationInfo```
 
 ## 部署prometheus  grafana  loki
 

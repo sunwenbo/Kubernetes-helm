@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: arangodb
   labels:
     app: arangodb
 spec:
   replicas: {{ .Values.replicaCount }}
+  serviceName: arangodb
   selector:
     matchLabels:
       app: arangodb
@@ -41,12 +42,15 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - name: arangodb
+          - name: arangodb-pvc
             mountPath: /var/lib/arangodb3
-      nodeSelector:
-        apache: livy-cdh6-krb
-      volumes:
-      - name: arangodb
-        hostPath:
-          path: /opt/data/arangodb
-          type: DirectoryOrCreate
+
+  volumeClaimTemplates:
+  - metadata:
+      name: arangodb-pvc
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "rook-cephfs"
+      resources:
+        requests:
+          storage: 5Gi

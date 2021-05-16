@@ -14,7 +14,7 @@ global:
   image:
       repository: image.senses-ai.com/odyssey/airflow-template
       pullPolicy: Always
-      tag: "release-202103101804"
+      tag: "release-202103171814"
   
   busybox:
     image: busybox
@@ -70,7 +70,7 @@ airflow-service:
   image:
     repository: image.senses-ai.com/odyssey/airflow-service
     pullPolicy: Always
-    tag: "release-202103101804"
+    tag: "release-202103171811"
   
   replicaCount: 1
 
@@ -148,7 +148,7 @@ odyssey-user-server:
   image:
     repository: image.senses-ai.com/odyssey/user-server
     pullPolicy: Always
-    tag: "release-202103101804"
+    tag: "release-202103181625"
   
   service:
     type: ClusterIP
@@ -166,7 +166,7 @@ visual-query-service:
   image:
     repository: image.senses-ai.com/odyssey/visual-query-service
     pullPolicy: Always
-    tag: "release-202103101804"
+    tag: "release-202103171644"
   
   resources:
      limits:
@@ -206,7 +206,7 @@ nginx:
   image:
     repository: image.senses-ai.com/nginx
     pullPolicy: Always
-    tag: "release-202103101804"
+    tag: "release-202103171633"
   
   service:
     type: NodePort

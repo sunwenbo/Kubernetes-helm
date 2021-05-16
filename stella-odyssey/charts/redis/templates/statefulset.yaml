@@ -49,16 +49,19 @@ spec:
           - name: redis-configmap
             mountPath: /etc/redis.conf
             subPath: redis.conf
-          - name:  redis-storage
+          - name:  redis-pvc
             mountPath: /data
       restartPolicy: Always
-      nodeSelector:
-        apache: livy-cdh6-krb
       volumes:
       - name: redis-configmap
         configMap:
           name: redis-configmap
-      - name: redis-storage
-        hostPath:
-          path: /opt/data/redis
-          type: DirectoryOrCreate
+  volumeClaimTemplates:
+  - metadata:
+      name: redis-pvc
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "rook-cephfs"
+      resources:
+        requests:
+          storage: 5Gi

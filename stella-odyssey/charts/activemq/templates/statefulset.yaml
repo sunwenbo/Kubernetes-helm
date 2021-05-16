@@ -53,11 +53,13 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /opt/apache-activemq-5.15.9/data
-              name: activemq-storage
-      nodeSelector:
-        apache: livy-cdh6-krb
-      volumes:
-      - name: activemq-storage
-        hostPath:
-          path: /opt/data/activemq
-          type: DirectoryOrCreate
+              name: activemq-pvc
+  volumeClaimTemplates:
+  - metadata:
+      name: activemq-pvc
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "rook-cephfs"
+      resources:
+        requests:
+          storage: 5Gi
